@@ -22,24 +22,47 @@ LIMIT 1;
 
 -- 3.Find all players in the database who played at Vanderbilt University. Create a list showing each player’s first and last names as well as the total salary they earned in the major leagues. Sort this list in descending order by the total salary earned. Which Vanderbilt player earned the most money in the majors?
 
-SELECT p.namefirst, p.namelast, schools.schoolname, saleries.salary
-FROM people p
-JOIN (SELECT name
-	 FROM schools s 
-	 ) sub ON p.playerid = s.schoolid
-JOIN saleries sl ON p.playerid = sl.playerid
-WHERE s.name = 'Vanderbilt'
-ORDER BY sl.salary DESC
+SELECT p.namefirst, p.namelast,  s.schoolname, sal.salary
+FROM schools AS s
+JOIN people AS p
+ON s.schoolid = p.playerid
+JOIN salaries AS sal
+ON p.playerid = sal.playerid
+WHERE s.schoolname = 'Vanderbilt University'
 
-SELECT p.namefirst, p.namelast, SUM(sal.salary) AS total_earnings
-FROM people AS p
-JOIN schools  ON p.playerid = schools.schoolid
-JOIN salaries AS sal ON p.playerid = sal.playerID
-WHERE schools.schoolname = 'Vanderbilt'
+SELECT p.playerID, p.nameFirst, p.nameLast, c.schoolID, SUM(s.salary) AS total_salary
+FROM collegeplaying c
+JOIN people p ON c.playerID = p.playerID
+JOIN salaries s ON c.playerID = s.playerID
+WHERE c.schoolID = 'VANDERBILT'
+GROUP BY p.playerID, c.schoolID
+ORDER BY total_salary DESC;
+
+
+
+SELECT p.nameFirst, p.nameLast, SUM(sal.salary) AS totalSalary
+FROM schools AS s
+JOIN collegeplaying AS cp ON s.schoolID = cp.schoolID
+JOIN people AS p ON cp.playerID = p.playerID
+JOIN salaries AS sal ON p.playerID = sal.playerID
+WHERE s.schoolName = 'Vanderbilt University'
 GROUP BY p.playerID
-ORDER BY total_earnings DESC;
+ORDER BY totalSalary DESC;
 
 -- 4.Using the fielding table, group players into three groups based on their position: label players with position OF as "Outfield", those with position "SS", "1B", "2B", and "3B" as "Infield", and those with position "P" or "C" as "Battery". Determine the number of putouts made by each of these three groups in 2016.
+SELECT
+  CASE
+    WHEN pos = 'OF' THEN 'Outfield'
+    WHEN pos IN ('SS', '1B', '2B', '3B') THEN 'Infield'
+    WHEN pos IN ('P', 'C') THEN 'Battery'
+  END AS positions,
+  SUM(po) AS putouts
+FROM
+  fielding
+WHERE
+  yearid = '2016'
+GROUP BY
+  positions;
 
 -- 5.Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?
 
