@@ -4,7 +4,40 @@ FROM homegames
 
 -- 2.Find the name and height of the shortest player in the database. How many games did he play in? What is the name of the team for which he played?
 
+SELECT p.namefirst, p.namelast, p.height, a.g_all, a.teamid, t.name
+FROM people p
+JOIN (
+    SELECT playerid
+    FROM people
+    WHERE height IS NOT NULL
+    ORDER BY height
+    LIMIT 1
+) sub ON p.playerid = sub.playerid
+JOIN appearances a ON p.playerid = a.playerid
+JOIN teams t ON a.teamid = t.teamid
+WHERE a.playerid = 'gaedeed01' AND t.teamid = 'SLA'
+LIMIT 1;
+
+
+
 -- 3.Find all players in the database who played at Vanderbilt University. Create a list showing each player’s first and last names as well as the total salary they earned in the major leagues. Sort this list in descending order by the total salary earned. Which Vanderbilt player earned the most money in the majors?
+
+SELECT p.namefirst, p.namelast, schools.schoolname, saleries.salary
+FROM people p
+JOIN (SELECT name
+	 FROM schools s 
+	 ) sub ON p.playerid = s.schoolid
+JOIN saleries sl ON p.playerid = sl.playerid
+WHERE s.name = 'Vanderbilt'
+ORDER BY sl.salary DESC
+
+SELECT p.namefirst, p.namelast, SUM(sal.salary) AS total_earnings
+FROM people AS p
+JOIN schools  ON p.playerid = schools.schoolid
+JOIN salaries AS sal ON p.playerid = sal.playerID
+WHERE schools.schoolname = 'Vanderbilt'
+GROUP BY p.playerID
+ORDER BY total_earnings DESC;
 
 -- 4.Using the fielding table, group players into three groups based on their position: label players with position OF as "Outfield", those with position "SS", "1B", "2B", and "3B" as "Infield", and those with position "P" or "C" as "Battery". Determine the number of putouts made by each of these three groups in 2016.
 
